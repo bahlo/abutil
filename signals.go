@@ -7,7 +7,8 @@ import (
 )
 
 // BeforeExit calls the given functions on various signals
-func BeforeExit(sigc chan os.Signal, fn func(os.Signal)) {
+func BeforeExit(fn func(os.Signal)) {
+	sigc := make(chan os.Signal)
 	signal.Notify(sigc,
 		syscall.SIGHUP,
 		syscall.SIGINT,

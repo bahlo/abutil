@@ -13,9 +13,9 @@ func Parallel(n int, fn func(int)) {
 	wg.Add(n)
 	defer wg.Wait()
 
-	for i := n; i > 0; i-- {
+	for i := 0; i < n; i++ {
 		go func() {
-			fn(n - i)
+			fn(n)
 			wg.Done()
 		}()
 	}
