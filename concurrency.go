@@ -13,9 +13,21 @@ func Parallel(n int, fn func(int)) {
 	wg.Add(n)
 	defer wg.Wait()
 
+	var m sync.Mutex
+	counter := 0
+
 	for i := 0; i < n; i++ {
 		go func() {
-			fn(n)
+			// Lock mutex to prevent multiple functions with the same index
+			m.Lock()
+
+			// Run function
+			fn(counter)
+
+			// Increment counter
+			counter++
+
+			m.Unlock()
 			wg.Done()
 		}()
 	}
