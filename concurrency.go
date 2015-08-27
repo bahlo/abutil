@@ -26,6 +26,7 @@ func ParallelExample() {
 	Parallel(4, func(n int) {
 		fmt.Print(n)
 	})
+
 	// Output: 0123 in any order
 }
 
