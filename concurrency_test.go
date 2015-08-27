@@ -1,6 +1,7 @@
 package abutil
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -69,4 +70,25 @@ func TestParallelTiming(t *testing.T) {
 	})
 
 	<-done
+}
+
+// The most basic call
+func ParallelExamples() {
+	Parallel(4, func(n int) {
+		fmt.Print(n)
+	})
+
+	// Output: 0123 in any order
+}
+
+// If you need to pass parameters to your function, just wrap it in another
+// and call the superior function immeditately.
+func ParallelExamples_Parameters() {
+	fn := func(someParam, someOtherParam string) func(int) {
+		return func(n int) {
+			fmt.Print(n, someParam, someOtherParam)
+		}
+	}
+
+	Parallel(4, fn("foo", "bar"))
 }

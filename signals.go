@@ -1,30 +1,34 @@
 package abutil
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-// BeforeExit calls the given functions once on the signals SIGHUP, SIGINT,
-// SIGTERM and SIGQUIT
-func BeforeExit(fn func(os.Signal)) {
-	sigc := make(chan os.Signal)
+// OnSignal calls the given function on the signals SIGHUP, SIGINT, SIGTERM
+// and SIGQUIT
+// You can optionally pass one signal channel to the function and it will use
+// this to listen to signals (useful for testing)
+func OnSignal(fn func(os.Signal), c ...chan os.Signal) {
+	// Get or create chan
+	var sigc chan os.Signal
+	if len(c) >= 1 {
+		sigc = c[0]
+	} else {
+		sigc = make(chan os.Signal)
+	}
+
+	// Listen for signals
 	signal.Notify(sigc,
 		syscall.SIGHUP,
 		syscall.SIGINT,
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 
-	s := <-sigc
-	fn(s)
-}
-
-func BeforeExitExample() {
-	BeforeExit(func(s os.Signal) {
-		fmt.Printf("Got signal %s\n", s)
-	})
-
-	// Output: Got signal interrupt
+	// Call the function on each one
+	for {
+		s := <-sigc
+		fn(s)
+	}
 }
