@@ -8,19 +8,15 @@ import (
 )
 
 func TestParallel(t *testing.T) {
-	var m sync.Mutex
 	var wg sync.WaitGroup
 
 	counter := 0
 
 	wg.Add(2)
 	go Parallel(2, func(n int) {
-		m.Lock()
 		counter++
-		m.Unlock()
 		wg.Done()
 	})
-
 	wg.Wait()
 
 	if counter != 2 {
@@ -29,15 +25,12 @@ func TestParallel(t *testing.T) {
 }
 
 func TestParallelCounter(t *testing.T) {
-	var m sync.Mutex
 	var wg sync.WaitGroup
 
 	sum := 0
 	wg.Add(4)
 	go Parallel(4, func(n int) {
-		m.Lock()
 		sum += n
-		m.Unlock()
 		wg.Done()
 	})
 

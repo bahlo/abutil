@@ -5,13 +5,12 @@ import (
 	"os"
 	"syscall"
 	"testing"
+	"time"
 )
 
 func TestOnSignal(t *testing.T) {
-	c := make(chan os.Signal)
 	done := make(chan bool)
-
-	sg := syscall.SIGINT
+	sg := syscall.SIGHUP
 
 	go OnSignal(func(s os.Signal) {
 		if s != sg {
@@ -19,10 +18,17 @@ func TestOnSignal(t *testing.T) {
 		}
 
 		done <- true
-	}, c)
+	})
 
-	c <- sg
+	// Send interrupt after 10ms
+	time.AfterFunc(10*time.Millisecond, func() {
+		syscall.Kill(syscall.Getpid(), sg)
+	})
 	<-done
+}
+
+func TestOnSignalNoChannel(t *testing.T) {
+	go OnSignal(func(s os.Signal) {})
 }
 
 func OnSignalExamples() {
