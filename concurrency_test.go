@@ -15,7 +15,9 @@ func TestParallel(t *testing.T) {
 	wg.Add(2)
 	go Parallel(2, func() {
 		m.Lock()
+
 		counter++
+
 		m.Unlock()
 		wg.Done()
 	})
