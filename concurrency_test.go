@@ -52,17 +52,19 @@ func TestParallelTiming(t *testing.T) {
 	counter := 0
 
 	go Parallel(4, func(n int) {
-		time.Sleep(time.Duration(n) * time.Millisecond)
+		time.Sleep(time.Duration(10*n) * time.Millisecond)
 		m.Lock()
 		counter++
 		m.Unlock()
 	})
 
 	done := make(chan bool)
-	time.AfterFunc(2*time.Millisecond, func() {
+	time.AfterFunc(25*time.Millisecond, func() {
+		m.Lock()
 		if counter != 2 {
 			t.Errorf("Expected counter to be %d, but got %d", 2, counter)
 		}
+		m.Unlock()
 		done <- true
 	})
 
