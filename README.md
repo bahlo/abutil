@@ -1,15 +1,11 @@
-# abutil
+# abutil [![GoDoc](https://godoc.org/github.com/bahlo/abutil?status.svg)](https://godoc.org/github.com/bahlo/abutil)
 
-abutil is a collection of often-used Golang patterns.
+abutil is a collection of often-used Golang helpers.
 
-## Why?
+## Usage
 
-Why not?
-
-## Seriously, why?
-
-Why would anyone write a library? I used the Code in this project so often,
-I wanted a central place to keep it DRY.
+I recommend reading the [Godoc](https://godoc.org/github.com/bahlo/abutil) for
+an overview of the provided functionality.
 
 ## License
 
