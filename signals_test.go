@@ -31,7 +31,7 @@ func TestOnSignalNoChannel(t *testing.T) {
 	go OnSignal(func(s os.Signal) {})
 }
 
-func OnSignalExamples() {
+func ExampleOnSignal() {
 	OnSignal(func(s os.Signal) {
 		fmt.Printf("Got signal %s\n", s)
 	})

@@ -29,7 +29,7 @@ func TestParallel(t *testing.T) {
 }
 
 // The most basic call
-func ParallelExamples() {
+func ExampleParallel() {
 	var m sync.Mutex
 
 	c := 0
@@ -47,7 +47,7 @@ func ParallelExamples() {
 
 // If you need to pass parameters to your function, just wrap it in another
 // and call the superior function immeditately.
-func ParallelExamples_Parameters() {
+func ExampleParallel_Parameters() {
 	fn := func(someParam, someOtherParam string) func() {
 		return func() {
 			fmt.Print(someParam, someOtherParam)
