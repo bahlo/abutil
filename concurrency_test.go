@@ -42,7 +42,7 @@ func ExampleParallel() {
 		m.Unlock()
 	})
 
-	// Output: 0123 in any order
+	// Output: 0123
 }
 
 // If you need to pass parameters to your function, just wrap it in another
