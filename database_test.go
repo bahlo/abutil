@@ -3,6 +3,7 @@ package abutil
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -18,7 +19,7 @@ func mockDBContext(t *testing.T, fn func(*sql.DB)) {
 	fn(db)
 }
 
-func TestRollback(t *testing.T) {
+func TestRollbackErr(t *testing.T) {
 	mockDBContext(t, func(db *sql.DB) {
 		sqlmock.ExpectBegin()
 		sqlmock.ExpectRollback()
@@ -29,15 +30,15 @@ func TestRollback(t *testing.T) {
 		}
 
 		alt := errors.New("Some alternative error")
-		err = Rollback(tx, alt)
+		err = RollbackErr(tx, alt)
 
 		if err != alt {
-			t.Errorf("Expected Rollback to return %v, but got %v", alt, err)
+			t.Errorf("Expected RollbackErr to return %v, but got %v", alt, err)
 		}
 	})
 }
 
-func TestRollbackFailing(t *testing.T) {
+func TestRollbackErrFailing(t *testing.T) {
 	mockDBContext(t, func(db *sql.DB) {
 		rberr := errors.New("Some rollback error")
 
@@ -50,9 +51,40 @@ func TestRollbackFailing(t *testing.T) {
 			t.Error(err)
 		}
 
-		err = Rollback(tx, errors.New("This should not be used"))
+		err = RollbackErr(tx, errors.New("This should not be used"))
 		if err != rberr {
-			t.Errorf("Expected Rollback to return %v, but got %v", rberr, err)
+			t.Errorf("Expected RollbackErr to return %v, but got %v", rberr, err)
 		}
+	})
+}
+
+func rollbackDBContext(fn func(*sql.DB)) {
+	db, _ := sqlmock.New()
+	fn(db)
+	db.Close()
+}
+
+func RollbackErrExample() {
+	insertSomething := func(db *sql.DB) error {
+		tx, _ := db.Begin()
+
+		_, err := tx.Exec("INSERT INTO some_table (some_column) VALUES (?)",
+			"foobar")
+		if err != nil {
+			// We now have a one-liner instead of a check every time an error
+			// occurs
+			return RollbackErr(tx, err)
+		}
+
+		_, err = tx.Exec("DROP DATABASE foobar")
+		if err != nil {
+			return RollbackErr(tx, err)
+		}
+
+		return nil
+	}
+
+	rollbackDBContext(func(db *sql.DB) {
+		fmt.Println(insertSomething(db))
 	})
 }
