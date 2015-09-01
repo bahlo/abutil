@@ -9,20 +9,20 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 )
 
-func mockDBContext(t *testing.T, fn func(*sql.DB)) {
-	db, err := sqlmock.New()
+func mockDBContext(t *testing.T, fn func(*sql.DB, sqlmock.Sqlmock)) {
+	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Error(err)
 	}
 	defer db.Close()
 
-	fn(db)
+	fn(db, mock)
 }
 
 func TestRollbackErr(t *testing.T) {
-	mockDBContext(t, func(db *sql.DB) {
-		sqlmock.ExpectBegin()
-		sqlmock.ExpectRollback()
+	mockDBContext(t, func(db *sql.DB, mock sqlmock.Sqlmock) {
+		mock.ExpectBegin()
+		mock.ExpectRollback()
 
 		tx, err := db.Begin()
 		if err != nil {
@@ -39,11 +39,11 @@ func TestRollbackErr(t *testing.T) {
 }
 
 func TestRollbackErrFailing(t *testing.T) {
-	mockDBContext(t, func(db *sql.DB) {
+	mockDBContext(t, func(db *sql.DB, mock sqlmock.Sqlmock) {
 		rberr := errors.New("Some rollback error")
 
-		sqlmock.ExpectBegin()
-		sqlmock.ExpectRollback().
+		mock.ExpectBegin()
+		mock.ExpectRollback().
 			WillReturnError(rberr)
 
 		tx, err := db.Begin()
@@ -59,7 +59,7 @@ func TestRollbackErrFailing(t *testing.T) {
 }
 
 func rollbackDBContext(fn func(*sql.DB)) {
-	db, _ := sqlmock.New()
+	db, _, _ := sqlmock.New()
 	fn(db)
 	db.Close()
 }
