@@ -47,7 +47,7 @@ func ExampleParallel() {
 
 // If you need to pass parameters to your function, just wrap it in another
 // and call the superior function immeditately.
-func ExampleParallel_Parameters() {
+func ExampleParallel_parameters() {
 	fn := func(someParam, someOtherParam string) func() {
 		return func() {
 			fmt.Print(someParam, someOtherParam)
