@@ -15,11 +15,12 @@ func TestParallel(t *testing.T) {
 	wg.Add(2)
 	go Parallel(2, func() {
 		m.Lock()
+		defer func() {
+			m.Unlock()
+			wg.Done()
+		}()
 
 		counter++
-
-		m.Unlock()
-		wg.Done()
 	})
 	wg.Wait()
 
@@ -35,11 +36,10 @@ func ExampleParallel() {
 	c := 0
 	Parallel(4, func() {
 		m.Lock()
+		defer m.Unlock()
 
 		fmt.Print(c)
 		c++
-
-		m.Unlock()
 	})
 
 	// Output: 0123

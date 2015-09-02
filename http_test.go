@@ -184,16 +184,22 @@ func ExampleGracefulServer() {
 			w.Write([]byte("Foo bar"))
 		}))
 
-	time.AfterFunc(20*time.Millisecond, func() {
-		// For some reason, we need to stop
+	// This channel blocks until all connections are closed or the time is up
+	sc := s.StopChan()
+
+	// Some go func that stops the server after 2 seconds for no reason
+	time.AfterFunc(1*time.Second, func() {
 		fmt.Print("Stopping server..")
-		s.Stop(0)
+		s.Stop(10 * time.Second)
 	})
 
 	if err := s.ListenAndServe(); err != nil && !s.Stopped() {
-		// An error occured but it wasn't intentionally
+		// We didn't stop the server, so something must be wrong
 		panic(err)
 	}
+
+	// Wait for the server to finish
+	<-sc
 	fmt.Print("bye!")
 
 	// Output: Stopping server..bye!

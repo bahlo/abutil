@@ -70,13 +70,17 @@ func ExampleRollbackErr() {
 		_, err := tx.Exec("INSERT INTO some_table (some_column) VALUES (?)",
 			"foobar")
 		if err != nil {
-			// We now have a one-liner instead of a check every time an error
-			// occurs
-			return RollbackErr(tx, err)
+			// The old way, imagine doing this 10 times in a method
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
 		}
 
 		_, err = tx.Exec("DROP DATABASE foobar")
 		if err != nil {
+			// With RollbackErr
 			return RollbackErr(tx, err)
 		}
 
