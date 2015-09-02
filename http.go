@@ -65,7 +65,7 @@ func NewGracefulServer(p int, h http.Handler) *GracefulServer {
 	return s
 }
 
-// Stopped returns if the server is running
+// Stopped returns if the server is stopped
 func (g *GracefulServer) Stopped() bool {
 	g.locker.Lock()
 	defer g.locker.Unlock()
