@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func mockRequestContext(t *testing.T, fn func(*http.Request)) {
@@ -90,4 +91,98 @@ func ExampleRemoteIP() {
 	remoteIPMockServe(someHandler)
 
 	// Output: New request from 123.456.7.8
+}
+
+func gracefulServerContext(t *testing.T, fn func(*GracefulServer)) {
+	p := 1337
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Foobar"))
+	})
+	to := 1 * time.Second
+
+	fn(NewGracefulServer(p, h, to))
+}
+
+func TestNewGracefulServer(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		if s.server.NoSignalHandling != true {
+			t.Error("NoSignalHandling should be true")
+		}
+
+		if s.server.Addr != ":1337" {
+			t.Error("Didn't set the port correctly")
+		}
+	})
+}
+
+func TestGracefulServerStopped(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		if !s.Stopped() {
+			t.Error("Stopped returned false, but shouldn't")
+		}
+
+		s.setStopped(false)
+
+		if s.Stopped() {
+			t.Error("Stopped returned true, but shouldn't")
+		}
+	})
+}
+
+func TestGracefulServerStop(t *testing.T) {
+	done := make(chan bool)
+
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(10*time.Millisecond, func() {
+			s.Stop()
+
+			if !s.Stopped() {
+				t.Error("Expected stopped to be true")
+			}
+
+			done <- true
+		})
+
+		s.ListenAndServe()
+	})
+
+	<-done
+}
+
+func TestGracefulServerListenAndServe(t *testing.T) {
+	done := make(chan bool)
+
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(10*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("The server should not be stopped after ListenAndServe")
+			}
+
+			s.Stop()
+			done <- true
+		})
+
+		s.ListenAndServe()
+	})
+
+	<-done
+}
+
+func TestGracefulServerListenAndServeTLS(t *testing.T) {
+	done := make(chan bool)
+
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(10*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("The server should not be stopped after ListenAndServe")
+			}
+
+			s.Stop()
+			done <- true
+		})
+
+		s.ListenAndServeTLS("foo", "bar")
+	})
+
+	<-done
 }
