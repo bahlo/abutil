@@ -98,18 +98,17 @@ func gracefulServerContext(t *testing.T, fn func(*GracefulServer)) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Foobar"))
 	})
-	to := 1 * time.Second
 
-	fn(NewGracefulServer(p, h, to))
+	fn(NewGracefulServer(p, h))
 }
 
 func TestNewGracefulServer(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
-		if s.server.NoSignalHandling != true {
+		if s.Server.NoSignalHandling != true {
 			t.Error("NoSignalHandling should be true")
 		}
 
-		if s.server.Addr != ":1337" {
+		if s.Server.Addr != ":1337" {
 			t.Error("Didn't set the port correctly")
 		}
 	})
@@ -130,59 +129,20 @@ func TestGracefulServerStopped(t *testing.T) {
 }
 
 func TestGracefulServerStop(t *testing.T) {
-	done := make(chan bool)
-
 	gracefulServerContext(t, func(s *GracefulServer) {
+		done := make(chan bool)
+
 		time.AfterFunc(10*time.Millisecond, func() {
-			s.Stop()
+			s.Stop(0)
 
 			if !s.Stopped() {
-				t.Error("Expected stopped to be true")
+				t.Error("Stopped returned false after Stop()")
 			}
 
 			done <- true
 		})
 
 		s.ListenAndServe()
+		<-done
 	})
-
-	<-done
-}
-
-func TestGracefulServerListenAndServe(t *testing.T) {
-	done := make(chan bool)
-
-	gracefulServerContext(t, func(s *GracefulServer) {
-		time.AfterFunc(10*time.Millisecond, func() {
-			if s.Stopped() {
-				t.Error("The server should not be stopped after ListenAndServe")
-			}
-
-			s.Stop()
-			done <- true
-		})
-
-		s.ListenAndServe()
-	})
-
-	<-done
-}
-
-func TestGracefulServerListenAndServeTLS(t *testing.T) {
-	done := make(chan bool)
-
-	gracefulServerContext(t, func(s *GracefulServer) {
-		time.AfterFunc(10*time.Millisecond, func() {
-			if s.Stopped() {
-				t.Error("The server should not be stopped after ListenAndServe")
-			}
-
-			s.Stop()
-			done <- true
-		})
-
-		s.ListenAndServeTLS("foo", "bar")
-	})
-
-	<-done
 }
