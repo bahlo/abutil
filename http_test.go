@@ -22,9 +22,9 @@ func mockRequestContext(t *testing.T, fn func(*http.Request)) {
 }
 
 func TestRemoteIP(t *testing.T) {
-	mockRequestContext(t, func(r *http.Request) {
-		ip := "123.456.7.8"
+	ip := "123.456.7.8"
 
+	mockRequestContext(t, func(r *http.Request) {
 		r.Header = http.Header{
 			"X-Real-Ip": []string{ip},
 		}
@@ -34,12 +34,8 @@ func TestRemoteIP(t *testing.T) {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
-}
 
-func TestRemoteIPForwardedFor(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
-		ip := "123.456.7.8"
-
 		r.Header = http.Header{
 			"X-Forwarded-For": []string{ip},
 		}
@@ -49,11 +45,8 @@ func TestRemoteIPForwardedFor(t *testing.T) {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
-}
 
-func TestRemoteIPRemoteAddr(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
-		ip := "123.456.7.8"
 		r.RemoteAddr = ip
 
 		out := RemoteIP(r)
@@ -61,9 +54,7 @@ func TestRemoteIPRemoteAddr(t *testing.T) {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
-}
 
-func TestRemoteIPLocalhost(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
 		ip := "127.0.0.1"
 		r.RemoteAddr = "["
@@ -104,7 +95,7 @@ func gracefulServerContext(t *testing.T, fn func(*GracefulServer)) {
 	fn(NewGracefulServer(p, h))
 }
 
-func TestNewGracefulServer(t *testing.T) {
+func TestGracefulServer(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		if s.Server.NoSignalHandling != true {
 			t.Error("NoSignalHandling should be true")
@@ -114,9 +105,7 @@ func TestNewGracefulServer(t *testing.T) {
 			t.Error("Didn't set the port correctly")
 		}
 	})
-}
 
-func TestGracefulServerStopped(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		if !s.Stopped() {
 			t.Error("Stopped returned false, but shouldn't")
@@ -128,9 +117,7 @@ func TestGracefulServerStopped(t *testing.T) {
 			t.Error("Stopped returned true, but shouldn't")
 		}
 	})
-}
 
-func TestGracefulServerStop(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		time.AfterFunc(20*time.Millisecond, func() {
 			s.Stop(0)
@@ -141,9 +128,7 @@ func TestGracefulServerStop(t *testing.T) {
 			t.Error("Stopped returned false after Stop()")
 		}
 	})
-}
 
-func TestGracefulServerListenAndServe(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		time.AfterFunc(20*time.Millisecond, func() {
 			if s.Stopped() {
@@ -155,9 +140,7 @@ func TestGracefulServerListenAndServe(t *testing.T) {
 
 		s.ListenAndServe()
 	})
-}
 
-func TestGracefulServerListenAndServeTLS(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		time.AfterFunc(20*time.Millisecond, func() {
 			if s.Stopped() {
@@ -169,9 +152,7 @@ func TestGracefulServerListenAndServeTLS(t *testing.T) {
 
 		s.ListenAndServeTLS("foo", "bar")
 	})
-}
 
-func TestGracefulServerListenAndServeTLSConfig(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		time.AfterFunc(20*time.Millisecond, func() {
 			if s.Stopped() {
@@ -183,9 +164,7 @@ func TestGracefulServerListenAndServeTLSConfig(t *testing.T) {
 
 		s.ListenAndServeTLSConfig(&tls.Config{})
 	})
-}
 
-func TestGracefulServerServe(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
 		time.AfterFunc(20*time.Millisecond, func() {
 			if s.Stopped() {

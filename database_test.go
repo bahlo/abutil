@@ -36,9 +36,7 @@ func TestRollbackErr(t *testing.T) {
 			t.Errorf("Expected RollbackErr to return %v, but got %v", alt, err)
 		}
 	})
-}
 
-func TestRollbackErrFailing(t *testing.T) {
 	mockDBContext(t, func(db *sql.DB, mock sqlmock.Sqlmock) {
 		rberr := errors.New("Some rollback error")
 

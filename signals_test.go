@@ -27,10 +27,6 @@ func TestOnSignal(t *testing.T) {
 	<-done
 }
 
-func TestOnSignalNoChannel(t *testing.T) {
-	go OnSignal(func(s os.Signal) {})
-}
-
 func ExampleOnSignal() {
 	done := make(chan bool)
 
