@@ -2,7 +2,9 @@ package abutil
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -130,19 +132,69 @@ func TestGracefulServerStopped(t *testing.T) {
 
 func TestGracefulServerStop(t *testing.T) {
 	gracefulServerContext(t, func(s *GracefulServer) {
-		done := make(chan bool)
-
-		time.AfterFunc(10*time.Millisecond, func() {
+		time.AfterFunc(20*time.Millisecond, func() {
 			s.Stop(0)
-
-			if !s.Stopped() {
-				t.Error("Stopped returned false after Stop()")
-			}
-
-			done <- true
 		})
 
 		s.ListenAndServe()
-		<-done
+		if !s.Stopped() {
+			t.Error("Stopped returned false after Stop()")
+		}
+	})
+}
+
+func TestGracefulServerListenAndServe(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(20*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("Server should not be stopped when running")
+			}
+
+			s.Stop(0)
+		})
+
+		s.ListenAndServe()
+	})
+}
+
+func TestGracefulServerListenAndServeTLS(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(20*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("Server should not be stopped when running")
+			}
+
+			s.Stop(0)
+		})
+
+		s.ListenAndServeTLS("foo", "bar")
+	})
+}
+
+func TestGracefulServerListenAndServeTLSConfig(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(20*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("Server should not be stopped when running")
+			}
+
+			s.Stop(0)
+		})
+
+		s.ListenAndServeTLSConfig(&tls.Config{})
+	})
+}
+
+func TestGracefulServerServe(t *testing.T) {
+	gracefulServerContext(t, func(s *GracefulServer) {
+		time.AfterFunc(20*time.Millisecond, func() {
+			if s.Stopped() {
+				t.Error("Server should not be stopped when running")
+			}
+
+			s.Stop(0)
+		})
+
+		s.Serve(&net.TCPListener{})
 	})
 }

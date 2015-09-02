@@ -1,6 +1,8 @@
 package abutil
 
 import (
+	"crypto/tls"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -46,15 +48,16 @@ type GracefulServer struct {
 // which listens on the given port.
 func NewGracefulServer(p int, h http.Handler) *GracefulServer {
 	var m sync.Mutex
-
 	s := &GracefulServer{
-		&graceful.Server{
+		Server: &graceful.Server{
 			Server: &http.Server{
 				Addr:    ":" + strconv.Itoa(p),
 				Handler: h,
 			},
 			NoSignalHandling: true,
-		}, true, &m,
+		},
+		stopped: true,
+		locker:  &m,
 	}
 
 	s.Server.ShutdownInitiated = func() { s.setStopped(true) }
@@ -74,4 +77,25 @@ func (g *GracefulServer) setStopped(r bool) {
 	g.locker.Lock()
 	g.stopped = r
 	g.locker.Unlock()
+}
+
+// Serve is equivalent to http.Server.Serve with graceful shutdown enabled
+func (g *GracefulServer) Serve(l net.Listener) error {
+	g.setStopped(false)
+	return g.Server.Serve(l)
+}
+
+func (g *GracefulServer) ListenAndServe() error {
+	g.setStopped(false)
+	return g.Server.ListenAndServe()
+}
+
+func (g *GracefulServer) ListenAndServeTLS(cf, kf string) error {
+	g.setStopped(false)
+	return g.Server.ListenAndServeTLS(cf, kf)
+}
+
+func (g *GracefulServer) ListenAndServeTLSConfig(c *tls.Config) error {
+	g.setStopped(false)
+	return g.Server.ListenAndServeTLSConfig(c)
 }
