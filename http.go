@@ -31,9 +31,9 @@ func RemoteIP(r *http.Request) string {
 	return a
 }
 
-// GracefulServer is a wrapper around graceful.Server from
-// github.com/tylerb/graceful, but adds a running variable and a mutex for
-// controlling the access to it.
+// GracefulServer is basically graceful.Server (github.com/tylerb/graceful),
+// but adds a state variable to check if stopped and doesn't listen on
+// signals (use OnSignal instead)
 type GracefulServer struct {
 	*graceful.Server
 
@@ -85,16 +85,22 @@ func (g *GracefulServer) Serve(l net.Listener) error {
 	return g.Server.Serve(l)
 }
 
+// ListenAndServe is equivalent to http.Server.ListenAndServe with graceful
+// shutdown enabled
 func (g *GracefulServer) ListenAndServe() error {
 	g.setStopped(false)
 	return g.Server.ListenAndServe()
 }
 
+// ListenAndServeTLS is equivalent to http.Server.ListenAndServeTLS with
+// graceful shutdown enabled
 func (g *GracefulServer) ListenAndServeTLS(cf, kf string) error {
 	g.setStopped(false)
 	return g.Server.ListenAndServeTLS(cf, kf)
 }
 
+// ListenAndServeTLSConfig is equivalent to
+// http.Server.ListenAndServeTLSConfig with graceful shutdown enabled
 func (g *GracefulServer) ListenAndServeTLSConfig(c *tls.Config) error {
 	g.setStopped(false)
 	return g.Server.ListenAndServeTLSConfig(c)
