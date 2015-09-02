@@ -1,5 +1,10 @@
 package abutil
 
+import (
+	"net/http"
+	"strings"
+)
+
 // RemoteIp tries to get the remote ip and returns it or ""
 func RemoteIp(r *http.Request) string {
 	a := r.Header.Get("X-Real-IP")
