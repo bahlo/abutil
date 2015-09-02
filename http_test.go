@@ -198,3 +198,24 @@ func TestGracefulServerServe(t *testing.T) {
 		s.Serve(&net.TCPListener{})
 	})
 }
+
+func ExampleGracefulServer() {
+	s := NewGracefulServer(1337,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Foo bar"))
+		}))
+
+	time.AfterFunc(20*time.Millisecond, func() {
+		// For some reason, we need to stop
+		fmt.Print("Stopping server..")
+		s.Stop(0)
+	})
+
+	if err := s.ListenAndServe(); err != nil && !s.Stopped() {
+		// An error occured but it wasn't intentionally
+		panic(err)
+	}
+	fmt.Print("bye!")
+
+	// Output: Stopping server..bye!
+}
