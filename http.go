@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// RemoteIp tries to get the remote ip and returns it or ""
-func RemoteIp(r *http.Request) string {
+// RemoteIP tries to get the remote ip and returns it or ""
+func RemoteIP(r *http.Request) string {
 	a := r.Header.Get("X-Real-IP")
 
 	if a == "" {

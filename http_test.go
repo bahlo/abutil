@@ -18,7 +18,7 @@ func mockRequestContext(t *testing.T, fn func(*http.Request)) {
 	fn(r)
 }
 
-func TestRemoteIp(t *testing.T) {
+func TestRemoteIP(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
 		ip := "123.456.7.8"
 
@@ -26,14 +26,14 @@ func TestRemoteIp(t *testing.T) {
 			"X-Real-Ip": []string{ip},
 		}
 
-		out := RemoteIp(r)
+		out := RemoteIP(r)
 		if out != ip {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
 }
 
-func TestRemoteIpForwardedFor(t *testing.T) {
+func TestRemoteIPForwardedFor(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
 		ip := "123.456.7.8"
 
@@ -41,38 +41,38 @@ func TestRemoteIpForwardedFor(t *testing.T) {
 			"X-Forwarded-For": []string{ip},
 		}
 
-		out := RemoteIp(r)
+		out := RemoteIP(r)
 		if out != ip {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
 }
 
-func TestRemoteIpRemoteAddr(t *testing.T) {
+func TestRemoteIPRemoteAddr(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
 		ip := "123.456.7.8"
 		r.RemoteAddr = ip
 
-		out := RemoteIp(r)
+		out := RemoteIP(r)
 		if out != ip {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
 }
 
-func TestRemoteIpLocalhost(t *testing.T) {
+func TestRemoteIPLocalhost(t *testing.T) {
 	mockRequestContext(t, func(r *http.Request) {
 		ip := "127.0.0.1"
 		r.RemoteAddr = "["
 
-		out := RemoteIp(r)
+		out := RemoteIP(r)
 		if out != ip {
 			t.Errorf("Expected %s, but got %s", ip, out)
 		}
 	})
 }
 
-func remoteIpMockServe(h http.HandlerFunc) {
+func remoteIPMockServe(h http.HandlerFunc) {
 	mockRequestContext(nil, func(r *http.Request) {
 		r.RemoteAddr = "123.456.7.8"
 
@@ -81,13 +81,13 @@ func remoteIpMockServe(h http.HandlerFunc) {
 	})
 }
 
-func ExampleRemoteIp() {
+func ExampleRemoteIP() {
 	someHandler := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("New request from %s\n", RemoteIp(r))
+		fmt.Printf("New request from %s\n", RemoteIP(r))
 	}
 
 	// Get's called with RemoteAddr = 123.456.7.8
-	remoteIpMockServe(someHandler)
+	remoteIPMockServe(someHandler)
 
 	// Output: New request from 123.456.7.8
 }
