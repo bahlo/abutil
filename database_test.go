@@ -58,13 +58,14 @@ func TestRollbackErrFailing(t *testing.T) {
 	})
 }
 
-func rollbackDBContext(fn func(*sql.DB)) {
-	db, _, _ := sqlmock.New()
+func exampleRollbackDBContext(fn func(*sql.DB)) {
+	db, mock, _ := sqlmock.New()
+	mock.ExpectBegin() // At least exopect the begin statement
 	fn(db)
 	db.Close()
 }
 
-func RollbackErrExample() {
+func ExampleRollbackErr() {
 	insertSomething := func(db *sql.DB) error {
 		tx, _ := db.Begin()
 
@@ -84,7 +85,7 @@ func RollbackErrExample() {
 		return nil
 	}
 
-	rollbackDBContext(func(db *sql.DB) {
+	exampleRollbackDBContext(func(db *sql.DB) {
 		fmt.Println(insertSomething(db))
 	})
 }
